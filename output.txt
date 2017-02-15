@@ -1,0 +1,8 @@
+Anastasia : np
+loves : vbz
+drinking : vbg
+tasty : jj
+coffee : nn
+every : at
+morning : nn
+. : .
