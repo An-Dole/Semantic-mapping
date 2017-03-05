@@ -1,8 +1,11 @@
-Anastasia : np
-loves : vbz
-drinking : vbg
-tasty : jj
-coffee : nn
-every : at
-morning : nn
-. : .
+Req_-266769640(clock:CLOCK; second:SECOND)
+	-- A clock tick should increase the value of the current second with 1 
+	-- The current second should be smaller than 59 before operation 
+   require
+     clock.second = second
+     clock.second < 59
+   do
+     clock.method
+   ensure
+     clock.second = second + 1
+   end
