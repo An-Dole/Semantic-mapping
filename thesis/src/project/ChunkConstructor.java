@@ -21,6 +21,8 @@ public class ChunkConstructor {
 
 	private Tagging<String> tags;
 
+	private int reqCounter = 1;
+
 	public void process(Scanner sc, PrintStream ps) throws Exception {
 		tagging(sc);
 		codeBuilder(constructPhrases(), ps);
@@ -56,6 +58,11 @@ public class ChunkConstructor {
 		// let us now tag the tokens with some part of speech from the model
 		// loaded above
 		tags = decoder.tag(tokenList);
+		PrintStream psp = new PrintStream(new File("tagging.txt"));
+		for (int i = 0; i < tags.size(); i++) {
+			psp.println(tags.token(i) + "\t\t" + tags.tag(i));
+		}
+
 	}
 
 	private ArrayList<String> constructPhrases() throws Exception {
@@ -72,19 +79,21 @@ public class ChunkConstructor {
 			}
 		}
 
+		// regular expressions for possible requirements sentences templates
 		ArrayList<String> regexp = new ArrayList<>();
-		regexp.add("(at)?(nn)+");
+		regexp.add("(at)?(jj)?(nn)+(n[ps])?");
 		regexp.add("(md)(vb)");
 		regexp.add("(at)?(nn)(in)");
-		regexp.add("(at)?(jj)(nn)+");
-		regexp.add("(in)(cd)");
+		regexp.add("(at)?(jj)?(nn)+[ps]?");
+		regexp.add("(in)(cd)?(nn)?");
 
 		regexp.add("(at)?(jj)?(nn)+");
-		regexp.add("(md)(be)?(jj)[sr]?((cs)(n)?)?");
-		regexp.add("(cd)");
-		// regexp.add("((cc)(be)?(jj)[sr]?((cs)(n)?)?(cd))?");
+		regexp.add("(md)(be)?(jj)[sr]?((cs)(n)?)?(in)?");
+		regexp.add("[(cd)(nn)]{2}");
+		// regexp.add("((cc)(be)?(jj)[sr]?((cs)(n)?)?(in)?(cd))?");
 		regexp.add("((in)(nn))?.");
 
+		// parsing of the sentences composed from tags
 		int regCounter = 0;
 		int globalCounter = 0;
 		int temp = 0;
@@ -148,6 +157,8 @@ public class ChunkConstructor {
 			regCounter++;
 			i = 0;
 		}
+
+		// printing the phrases to the separate file
 		PrintStream psp = new PrintStream(new File("phrases.txt"));
 		for (String s : phrases) {
 			psp.println(s);
@@ -156,9 +167,8 @@ public class ChunkConstructor {
 	}
 
 	private void codeBuilder(ArrayList<String> phrases, PrintStream ps) {
-		Random r = new Random();
-		r.setSeed(System.currentTimeMillis());
-		ps.print("Req_" + r.nextInt());
+
+		ps.print("Req_" + reqCounter++);
 		String noun = "";
 		for (int i = 0; i < tags.size(); i++) {
 			if (tags.tag(i).equals("nn")) {
@@ -179,12 +189,63 @@ public class ChunkConstructor {
 		ps.println();
 		ps.println("   require");
 		ps.println("     " + noun + "." + buffer + " = " + buffer);
-		ps.println("     " + noun + "." + buffer + " < " + phrases.get(7));
+		String operation = "";
+		operation = phrases.get(6).substring(0, phrases.get(6).lastIndexOf(" "));
+		operation = operation.substring(operation.lastIndexOf(" ") + 1);
+		switch (operation) {
+		case "smaller":
+		case "lower":
+		case "less":
+		case "under":
+			operation = " < ";
+			break;
+		case "bigger":
+		case "more":
+		case "larger":
+		case "over":
+		case "above":
+			operation = " > ";
+			break;
+		case "equal":
+		case "equals":
+		case "is":
+			operation = " = ";
+			break;
+		}
+		if(phrases.get(8).substring(0, phrases.get(8).indexOf(" ")).equals("before"))
+		{
+			ps.println("     " + noun + "." + buffer + operation + phrases.get(7));
+		}
 		ps.println("   do");
 		ps.println("     " + noun + "." + "method");
 		ps.println("   ensure");
-		ps.println("     " + noun + "." + buffer + " = " + buffer + " + "
-				+ phrases.get(4).charAt(phrases.get(4).length() - 1));
+		if(phrases.get(8).substring(0, phrases.get(8).indexOf(" ")).equals("after"))
+		{
+			ps.println("     " + noun + "." + buffer + operation + phrases.get(7));
+		}
+		operation = phrases.get(1).substring(phrases.get(1).lastIndexOf(" ") + 1);
+		switch (operation) {
+		case "increase":
+		case "add":
+		case "enlarge":
+			operation = " + ";
+			break;
+		case "decrease":
+		case "reduce":
+			operation = " - ";
+			break;
+		case "multiply":
+			operation = " * ";
+			break;
+		case "divide":
+			operation = " / ";
+			break;
+		case "assign":
+			operation = " = ";
+			break;
+		}
+		ps.println("     " + noun + "." + buffer + " = " + buffer + operation
+				+ phrases.get(4).substring(phrases.get(4).lastIndexOf(" ")+1));
 		ps.println("   end");
 	}
 }

@@ -1,5 +1,5 @@
 A clock tick
-should increase
+should reduce
 the value of
 the current second
 with 1
