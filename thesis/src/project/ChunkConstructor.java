@@ -8,7 +8,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.Scanner;
 
 import com.aliasi.hmm.HiddenMarkovModel;
@@ -22,7 +21,7 @@ public class ChunkConstructor {
 	private Tagging<String> tags;
 
 	private int reqCounter = 1;
-	
+
 	private String type;
 
 	public void process(Scanner sc, PrintStream ps) throws Exception {
@@ -75,8 +74,8 @@ public class ChunkConstructor {
 		// constructing tag phrases for sentences
 		for (int i = 0; i < tags.size(); i++) {
 			if (tags.tag(i).equals("(")) {
-				type = tags.token(i+1);
-				i+=2;
+				type = tags.token(i + 1);
+				i += 2;
 				continue;
 			}
 			buffer += tags.tag(i);
@@ -98,7 +97,7 @@ public class ChunkConstructor {
 		regexp.add("(md)(be)?(jj)[sr]?((cs)(n)?)?(in)?");
 		regexp.add("[(cd)(nn)]{2}");
 		// regexp.add("((cc)(be)?(jj)[sr]?((cs)(n)?)?(in)?(cd))?");
-		regexp.add("((in)(at)?(nn))?.");
+		regexp.add("(((in)(at)?(nn)?((vb)+g?)?)((cc)(at)?(.{2,3}))?)?.");
 
 		// parsing of the sentences composed from tags
 		int regCounter = 0;
@@ -114,10 +113,9 @@ public class ChunkConstructor {
 			String tok = tokenz[0];
 			for (int j = 0; j < tok.length(); j++) {
 				for (int k = 0; k < tok.length(); k++) {
-					if(tags.tag(globalCounter).equals("("))
-					{
-						globalCounter+=3;
-						k=-1;
+					if (tags.tag(globalCounter).equals("(")) {
+						globalCounter += 3;
+						k = -1;
 						continue;
 					}
 					if (tok.contains(tags.tag(globalCounter))) {
@@ -190,7 +188,7 @@ public class ChunkConstructor {
 				break;
 			}
 		}
-		String buffer = phrases.get(3).substring(phrases.get(3).lastIndexOf(" ")+1);
+		String buffer = phrases.get(3).substring(phrases.get(3).lastIndexOf(" ") + 1);
 		ps.print(" " + buffer + ":" + type.toUpperCase() + ")");
 		for (int i = 0; i < phrases.size(); i++) {
 			if (phrases.get(i).charAt(0) >= 'A' && phrases.get(i).charAt(0) <= 'Z') {
@@ -225,15 +223,26 @@ public class ChunkConstructor {
 			operation = " = ";
 			break;
 		}
-		if(phrases.get(8).substring(0, phrases.get(8).indexOf(" ")).equals("before"))
-		{
+		if (phrases.get(8).substring(0, phrases.get(8).indexOf(" ")).equals("before")) {
 			ps.println("     " + noun + "." + buffer + operation + phrases.get(7));
 		}
 		ps.println("   do");
-		ps.println("     " + noun + "." + phrases.get(8).substring(phrases.get(8).lastIndexOf(" ")+1, phrases.get(8).length()));
-		ps.println("   ensure");
-		if(phrases.get(8).substring(0, phrases.get(8).indexOf(" ")).equals("after"))
+		String method1, method2;
+		method1 = phrases.get(8).substring(phrases.get(8).indexOf(" ") + 1);
+		method1 = method1.substring(method1.indexOf(" ") + 1);
+		method2 = method1.substring(method1.lastIndexOf(" ") + 1);
+		if (!method1.equals(method2)) {
+			method1 = method1.substring(0, method1.indexOf(" "));
+		} else {
+			method2 = null;
+		}
+		ps.println("     " + noun + "." + method1);
+		if(method2!=null)
 		{
+			ps.println("     " + noun + "." + method2);
+		}
+		ps.println("   ensure");
+		if (phrases.get(8).substring(0, phrases.get(8).indexOf(" ")).equals("after")) {
 			ps.println("     " + noun + "." + buffer + operation + phrases.get(7));
 		}
 		operation = phrases.get(1).substring(phrases.get(1).lastIndexOf(" ") + 1);
@@ -258,7 +267,7 @@ public class ChunkConstructor {
 			break;
 		}
 		ps.println("     " + noun + "." + buffer + " = " + buffer + operation
-				+ phrases.get(4).substring(phrases.get(4).lastIndexOf(" ")+1));
+				+ phrases.get(4).substring(phrases.get(4).lastIndexOf(" ") + 1));
 		ps.println("   end");
 	}
 }

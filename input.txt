@@ -1,2 +1,2 @@
-A clock tick should increase the value of the current second (integer) with 1.
-The current second should be smaller than 59 before a tick.
+A clock tick should reduce the value of the current second (integer) with 1.
+The current second should be smaller than 59 after a tick and synchronization.

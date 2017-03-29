@@ -2,7 +2,7 @@ A		at
 clock		nn
 tick		nn
 should		md
-increase		vb
+reduce		vb
 the		at
 value		nn
 of		in
@@ -23,7 +23,9 @@ be		be
 smaller		jjr
 than		cs
 59		cd
-before		in
+after		in
 a		at
 tick		nn
+and		cc
+synchronization		nn
 .		.
