@@ -1,2 +1,0 @@
-The account balance will reduce the value of rubles by n.
-The balance should be bigger than n before operation.

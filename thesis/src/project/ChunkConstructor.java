@@ -22,6 +22,8 @@ public class ChunkConstructor {
 	private Tagging<String> tags;
 
 	private int reqCounter = 1;
+	
+	private String type;
 
 	public void process(Scanner sc, PrintStream ps) throws Exception {
 		tagging(sc);
@@ -72,6 +74,11 @@ public class ChunkConstructor {
 
 		// constructing tag phrases for sentences
 		for (int i = 0; i < tags.size(); i++) {
+			if (tags.tag(i).equals("(")) {
+				type = tags.token(i+1);
+				i+=2;
+				continue;
+			}
 			buffer += tags.tag(i);
 			if (tags.tag(i).equals(".")) {
 				tagPhrases.add(buffer);
@@ -91,7 +98,7 @@ public class ChunkConstructor {
 		regexp.add("(md)(be)?(jj)[sr]?((cs)(n)?)?(in)?");
 		regexp.add("[(cd)(nn)]{2}");
 		// regexp.add("((cc)(be)?(jj)[sr]?((cs)(n)?)?(in)?(cd))?");
-		regexp.add("((in)(nn))?.");
+		regexp.add("((in)(at)?(nn))?.");
 
 		// parsing of the sentences composed from tags
 		int regCounter = 0;
@@ -107,6 +114,12 @@ public class ChunkConstructor {
 			String tok = tokenz[0];
 			for (int j = 0; j < tok.length(); j++) {
 				for (int k = 0; k < tok.length(); k++) {
+					if(tags.tag(globalCounter).equals("("))
+					{
+						globalCounter+=3;
+						k=-1;
+						continue;
+					}
 					if (tok.contains(tags.tag(globalCounter))) {
 						phrase += tags.token(globalCounter) + " ";
 						temp += tags.tag(globalCounter).length();
@@ -177,8 +190,8 @@ public class ChunkConstructor {
 				break;
 			}
 		}
-		String buffer = phrases.get(3).substring(phrases.get(3).lastIndexOf(" ") + 1, phrases.get(3).length());
-		ps.print(" " + buffer + ":" + buffer.toUpperCase() + ")");
+		String buffer = phrases.get(3).substring(phrases.get(3).lastIndexOf(" ")+1);
+		ps.print(" " + buffer + ":" + type.toUpperCase() + ")");
 		for (int i = 0; i < phrases.size(); i++) {
 			if (phrases.get(i).charAt(0) >= 'A' && phrases.get(i).charAt(0) <= 'Z') {
 				ps.println();
@@ -217,7 +230,7 @@ public class ChunkConstructor {
 			ps.println("     " + noun + "." + buffer + operation + phrases.get(7));
 		}
 		ps.println("   do");
-		ps.println("     " + noun + "." + "method");
+		ps.println("     " + noun + "." + phrases.get(8).substring(phrases.get(8).lastIndexOf(" ")+1, phrases.get(8).length()));
 		ps.println("   ensure");
 		if(phrases.get(8).substring(0, phrases.get(8).indexOf(" ")).equals("after"))
 		{

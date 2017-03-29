@@ -1,9 +1,9 @@
 A clock tick
-should reduce
+should increase
 the value of
 the current second
 with 1
 The current second
 should be smaller than
 59
-before operation
+before a tick

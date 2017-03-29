@@ -1,11 +1,11 @@
-Req_1(clock:CLOCK; second:SECOND)
-	-- A clock tick should reduce the value of the current second with 1 
-	-- The current second should be smaller than 59 before operation 
+Req_1(clock:CLOCK; second:INTEGER)
+	-- A clock tick should increase the value of the current second with 1 
+	-- The current second should be smaller than 59 before a tick 
    require
      clock.second = second
      clock.second < 59
    do
-     clock.method
+     clock.tick
    ensure
-     clock.second = second - 1
+     clock.second = second + 1
    end
